@@ -25,7 +25,7 @@
 import sys
 import os
 import argparse
-import cPickle as pickle
+import pickle as pickle
 import sqlite3
 import itertools
 
@@ -61,7 +61,7 @@ def parse_db_output(db_output_file, ddg_data, score_fxns):
     return (ddg_data, score_fxns)
 
 def get_mutations_data_from_pdb_dict(pdb_data_dict, PDBPosID):
-    for m in pdb_data_dict.values():
+    for m in list(pdb_data_dict.values()):
         if PDBPosID in m.PDBPosID_list:
             return m
     raise Exception("Couldn't match ID %s" % str(PDBPosID))
@@ -97,14 +97,14 @@ if __name__ == '__main__':
             if os.path.isfile(db_output_file):
                 db_output_files.append(db_output_file)
 
-        print 'Found %d output dbs (%d expected)' % (len(db_output_files), len(job_dict))
+        print('Found %d output dbs (%d expected)' % (len(db_output_files), len(job_dict)))
 
         score_fxns = set()
         ddg_data = {}
         for db_output_file in db_output_files:
             ddg_data, score_fxns = parse_db_output(db_output_file, ddg_data, score_fxns)
 
-        for mut in mutations_data.values():
+        for mut in list(mutations_data.values()):
             for i, PDBPosID in enumerate(mut.PDBPosID_list):
                 if PDBPosID not in ddg_data:
                     ddg_data[PDBPosID] = {}
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         # Write output CSV and create data lists for further analysis
         all_data_ids = []
         data_id_in_interface = [] # True/False mask array
-        all_data_points = [[] for x in xrange(len(score_fxns))]
+        all_data_points = [[] for x in range(len(score_fxns))]
         with open(
             os.path.join(analysis_output_dir,
                          'results-%s.csv' % os.path.basename(output_dir)),
@@ -159,8 +159,8 @@ if __name__ == '__main__':
                 f.write('%s - %s vs %s\n' % (name, i_score_fxn, j_score_fxn) )
                 f.write(stats_str)
                 f.write('\n\n')
-            print stats_str
-            print
+            print(stats_str)
+            print()
 
             table_for_plot = []
             for pt_id, pt_i, pt_j in zip(data_ids, i_data_points, j_data_points):
@@ -179,9 +179,9 @@ if __name__ == '__main__':
             # Compress implementation with inversion option
             # compress('ABCDEF', [1,0,1,0,1,1]) --> A C E F
             if invert:
-                return [d for d, s in itertools.izip(data, selectors) if not s]
+                return [d for d, s in zip(data, selectors) if not s]
             else:
-                return [d for d, s in itertools.izip(data, selectors) if s]
+                return [d for d, s in zip(data, selectors) if s]
 
         # Uncomment this outer loop to do all-by-all comparison
         # Otherwise, default is to only compare against first, experimental results
@@ -192,9 +192,9 @@ if __name__ == '__main__':
             if i == j:
                 continue
 
-            print '########', i_score_fxn, 'vs', j_score_fxn, '########'
+            print('########', i_score_fxn, 'vs', j_score_fxn, '########')
 
-            print '#### Points in interface: ####'
+            print('#### Points in interface: ####')
             run_stats(
                 'interface_pts', score_fxns[i], score_fxns[j],
                 compress(all_data_ids, data_id_in_interface),

@@ -25,7 +25,7 @@
 import os
 import sys
 import setup_alanine_scanning
-import cPickle as pickle
+import pickle as pickle
 from math import sqrt
 
 cutoff_dist = 5.0
@@ -115,7 +115,7 @@ def get_close_residues_dict():
             chain = mut_data.chain_list[i]
             close_residues = find_resnums_around_mutation(pdb_id, int(pdb_res), insertion_code, chain)
 
-            print 'Mutation %s:%d%s has %d residues within %.1f angstroms' % (pdb_id, pdb_res, insertion_code, len(close_residues), cutoff_dist)
+            print('Mutation %s:%d%s has %d residues within %.1f angstroms' % (pdb_id, pdb_res, insertion_code, len(close_residues), cutoff_dist))
 
             if pdb_id not in close_residues_dict:
                 close_residues_dict[pdb_id] = {}

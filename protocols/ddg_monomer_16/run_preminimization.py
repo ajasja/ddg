@@ -79,7 +79,7 @@ try:
     import multiprocessing
 except:
     multiprocessing_module_available = False
-import cPickle as pickle
+import pickle as pickle
 import getpass
 import rosetta.parse_settings
 from rosetta.write_run_file import process as write_run_file
@@ -124,7 +124,7 @@ def create_input_files(job_dict, settings, pdb_dir_path, pdb_data_dir, mutfile_d
 
     # Assert that there are no empty sequences
     assert(sorted(stripped_pdb.atom_sequences.keys()) == sorted(chains))
-    for chain_id, sequence in stripped_pdb.atom_sequences.iteritems():
+    for chain_id, sequence in stripped_pdb.atom_sequences.items():
         assert(len(sequence) > 0)
 
     # Check for CSE and MSE
@@ -134,8 +134,8 @@ def create_input_files(job_dict, settings, pdb_dir_path, pdb_data_dir, mutfile_d
         elif 'MSE' in stripped_pdb.residue_types:
             raise Exception('This case contains an MSE residue which may (or may not) cause an issue with Rosetta depending on the version.')
             # It looks like MSE (and CSE?) may now be handled - https://www.rosettacommons.org/content/pdb-files-rosetta-format
-    except Exception, e:
-        print('%s: %s, chain %s' % (str(e), str(stripped_pdb.pdb_id), chain))
+    except Exception as e:
+        print(('%s: %s, chain %s' % (str(e), str(stripped_pdb.pdb_id), chain)))
 
     # Turn the lines array back into a valid PDB file
     if not(skip_if_exists) or not(os.path.exists(stripped_pdb_path)):
@@ -164,7 +164,7 @@ def create_input_files(job_dict, settings, pdb_dir_path, pdb_data_dir, mutfile_d
     total_num_residues = 0
     d = json.loads(rosetta_to_atom_residue_map)
     for chain_id in chains:
-        num_chain_residues = len([z for z in d.values() if z[0] == chain_id])
+        num_chain_residues = len([z for z in list(d.values()) if z[0] == chain_id])
         total_num_residues += num_chain_residues
         assert(num_chain_residues > 0)
 
@@ -189,9 +189,9 @@ def create_input_files(job_dict, settings, pdb_dir_path, pdb_data_dir, mutfile_d
             if os.path.exists(mutfilename):
                 raise Exception('%s already exists. Check that the RecordIDs in the JSON file are all unique.' % mutfilename)
             write_file(os.path.join(mutfile_data_dir, '%d.mutfile' % (dataset_case['RecordID'])), str(mutfile))
-    except Exception, e:
-        print(str(e))
-        print(traceback.format_exc())
+    except Exception as e:
+        print((str(e)))
+        print((traceback.format_exc()))
 
     # Set up --in:file:l parameter
     pdb_relpath = os.path.relpath(stripped_pdb_path, settings['output_dir'])
@@ -234,8 +234,8 @@ if __name__ == '__main__':
     import pprint
     try:
         arguments = docopt.docopt(__doc__.format(**locals()))
-    except Exception, e:
-        print('Failed while parsing arguments: %s.' % str(e))
+    except Exception as e:
+        print(('Failed while parsing arguments: %s.' % str(e)))
         sys.exit(1)
 
     # Set the PDB input path
@@ -268,7 +268,7 @@ if __name__ == '__main__':
         else:
             # If the user has not specified the number of processors, only one is selected, and more exist then let them know that this process may run faster
             if num_processors == 1 and num_system_processors > 1:
-                print('The setup is configured to use one processor but this machine has %d processors. The --parallel or --maxp options may make this setup run faster.' % num_system_processors)
+                print(('The setup is configured to use one processor but this machine has %d processors. The --parallel or --maxp options may make this setup run faster.' % num_system_processors))
     if 1 > num_processors or num_processors > num_system_processors:
         raise Exception('The number of processors must be an integer between 1 and %d.' % num_system_processors)
 
@@ -276,7 +276,7 @@ if __name__ == '__main__':
     try:
         dataset = json.loads(read_file(dataset_filepath))
         dataset_cases = dataset['data']
-    except Exception, e:
+    except Exception as e:
         raise Exception('An error occurred parsing the JSON file: %s..' % str(e))
 
     # Set the job directory name
@@ -289,7 +289,7 @@ if __name__ == '__main__':
     if arguments.get('--output_directory'):
         root_output_directory = arguments['--output_directory'][0]
     if not os.path.exists(root_output_directory):
-        print('Creating directory %s:' % root_output_directory)
+        print(('Creating directory %s:' % root_output_directory))
         os.makedirs(root_output_directory)
 
     # Set the job output directory
@@ -329,7 +329,7 @@ if __name__ == '__main__':
             pdb_monomers = []
             print('Creating test run input...')
             num_cases = 0
-            for keypair, v in sorted(count_by_pdb_chain.iteritems(), key=lambda x:-x[1]):
+            for keypair, v in sorted(iter(count_by_pdb_chain.items()), key=lambda x:-x[1]):
                 if v <= 10:
                     pdb_monomers.append(keypair)
                     num_cases += v
@@ -354,12 +354,12 @@ if __name__ == '__main__':
         if arguments['--beta_nov15']:
             assert(not(extra_s))
             extra_s = ' (using beta_nov15)'
-        print('Creating benchmark input:%s' % extra_s)
+        print(('Creating benchmark input:%s' % extra_s))
 
         if num_processors == 1:
             job_dict = use_single_processor(settings, pdb_monomers, input_pdb_dir_path, pdb_data_dir, mutfile_data_dir, dataset_cases_by_pdb_chain)
         else:
-            print('Setting up the preminimization data using %d processors.' % num_processors)
+            print(('Setting up the preminimization data using %d processors.' % num_processors))
             job_dict = use_multiple_processors(settings, pdb_monomers, input_pdb_dir_path, pdb_data_dir, mutfile_data_dir, dataset_cases_by_pdb_chain, num_processors)
 
         with open(os.path.join(output_data_dir, 'job_dict.pickle'), 'w') as f:
@@ -385,19 +385,19 @@ if __name__ == '__main__':
 
         write_run_file(settings)
         job_path = os.path.abspath(output_dir)
-        print('''Job files written to directory: %s.\n\nTo launch this job:
+        print(('''Job files written to directory: %s.\n\nTo launch this job:
         cd %s
-        python %s.py\n''' % (job_path, job_path, generated_scriptname))
-    except Exception, e:
-        print('\nAn exception occurred setting up the preminimization step: "%s".' % str(e))
+        python %s.py\n''' % (job_path, job_path, generated_scriptname)))
+    except Exception as e:
+        print(('\nAn exception occurred setting up the preminimization step: "%s".' % str(e)))
         sys.stdout.write('Removing the directory %s: ' % output_dir)
         try:
             shutil.rmtree(output_dir)
             print('done.\n')
-        except Exception, e2:
+        except Exception as e2:
             print('failed.\n')
-            print(str(e2))
-            print(traceback.format_exc())
+            print((str(e2)))
+            print((traceback.format_exc()))
 
 
 

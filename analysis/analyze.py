@@ -41,8 +41,8 @@ Authors:
 
 import sys
 import os
-from libraries import docopt
-from stats import get_xy_dataset_statistics, plot, read_file, RInterface, format_stats_for_printing
+from .libraries import docopt
+from .stats import get_xy_dataset_statistics, plot, read_file, RInterface, format_stats_for_printing
 
 correlation_coefficient_scatterplotplot = RInterface.correlation_coefficient_gplot
 
@@ -76,21 +76,21 @@ def parse_csv(filename):
             else:
                 raise Exception('At least two columns (experimental DDG, predicted DDG) are expected.')
         return table
-    except Exception, e:
+    except Exception as e:
         raise Exception('An exception occurred parsing the CSV/TSV file: %s' % str(e))
 
 
 if __name__ == '__main__':
     try:
         arguments = docopt.docopt(__doc__.format(**locals()))
-    except Exception, e:
-        print('Failed while parsing arguments: %s.' % str(e))
+    except Exception as e:
+        print(('Failed while parsing arguments: %s.' % str(e)))
         sys.exit(1)
 
     # Read file input file
     input_filename = arguments['<inputfile>'][0]
     if not os.path.exists(input_filename):
-        print('Error: the input file %s does not exist.' % input_filename)
+        print(('Error: the input file %s does not exist.' % input_filename))
         sys.exit(2)
     analysis_table = read_json(input_filename)
     if not analysis_table:
@@ -102,9 +102,9 @@ if __name__ == '__main__':
     if output_filename_ext not in ['.png', '.pdf']: # todo: check eps output ('.eps')
         output_filename += '.png'
 
-    print('\n' + '*'*10 + ' Statistics ' +'*'*10)
-    print(format_stats_for_printing(get_xy_dataset_statistics(analysis_table)))
+    print(('\n' + '*'*10 + ' Statistics ' +'*'*10))
+    print((format_stats_for_printing(get_xy_dataset_statistics(analysis_table))))
 
-    print('\nSaving scatterplot to %s.\n' % output_filename)
+    print(('\nSaving scatterplot to %s.\n' % output_filename))
     plot(analysis_table, output_filename, correlation_coefficient_scatterplotplot)
 

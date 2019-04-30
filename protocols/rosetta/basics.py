@@ -62,7 +62,7 @@ residue_type_3to1_map = {
 }
 
 residue_type_1to3_map = {}
-for k, v in residue_type_3to1_map.iteritems():
+for k, v in residue_type_3to1_map.items():
     residue_type_1to3_map[v] = k
 
 residue_types_3 = set(residue_type_3to1_map.keys())
@@ -226,9 +226,9 @@ class Sequence(object):
         return len(self.sequence)
 
     def ids(self):
-        return self.sequence.keys()
+        return list(self.sequence.keys())
 
-    def next(self): # todo: This is __next__ in Python 3.x
+    def __next__(self): # todo: This is __next__ in Python 3.x
         try:
             id = self.order[self._iter_index]
             self._iter_index += 1
@@ -255,7 +255,7 @@ class Sequence(object):
     def set_type(self, sequence_type):
         '''Set the type of a Sequence if it has not been set.'''
         if not(self.sequence_type):
-            for id, r in self.sequence.iteritems():
+            for id, r in self.sequence.items():
                 assert(r.residue_type == None)
                 r.residue_type = sequence_type
             self.sequence_type = sequence_type
@@ -285,12 +285,12 @@ class SequenceMap(object):
 
     @staticmethod
     def from_dict(d):
-        for k, v in d.iteritems():
-            assert(type(k) == types.IntType or type(k) == types.StringType or type(k) == types.UnicodeType)
-            assert(type(v) == types.IntType or type(v) == types.StringType or type(v) == types.UnicodeType)
+        for k, v in d.items():
+            assert(type(k) == int or type(k) == bytes or type(k) == str)
+            assert(type(v) == int or type(v) == bytes or type(v) == str)
         s = SequenceMap()
         s.map = d
-        s.substitution_scores = dict.fromkeys(d.keys(), None)
+        s.substitution_scores = dict.fromkeys(list(d.keys()), None)
         return s
 
     def add(self, key, value, substitution_score):
@@ -327,21 +327,21 @@ class SequenceMap(object):
         return self.map.get(k, default_value)
 
     def keys(self):
-        return self.map.keys()
+        return list(self.map.keys())
 
     def values(self):
-        return self.map.values()
+        return list(self.map.values())
 
     def __getitem__(self, item):
         return self.map.get(item)
 
     def __setitem__(self, key, value):
-        assert(type(key) == types.IntType or type(key) == types.StringType or type(key) == types.UnicodeType)
-        assert(type(value) == types.IntType or type(value) == types.StringType or type(value) == types.UnicodeType)
+        assert(type(key) == int or type(key) == bytes or type(key) == str)
+        assert(type(value) == int or type(value) == bytes or type(value) == str)
         self.map[key] = value
         self.substitution_scores[key] = None
 
-    def next(self): # todo: This is __next__ in Python 3.x
+    def __next__(self): # todo: This is __next__ in Python 3.x
         try:
             id = self._iter_keys.pop()
             return id, self.map[id], self.substitution_scores[id]
@@ -353,8 +353,8 @@ class SequenceMap(object):
         return self
 
     def __eq__(self, other):
-        if self.keys() == other.keys():
-            for k in self.keys():
+        if list(self.keys()) == list(other.keys()):
+            for k in list(self.keys()):
                 if self[k] != other[k]:
                     return False
             return True
@@ -363,7 +363,7 @@ class SequenceMap(object):
 
     def __le__(self, other):
         if set(self.keys()).issubset == set(other.keys()):
-            for k in self.keys():
+            for k in list(self.keys()):
                 if self[k] != other[k]:
                     return False
             return True
@@ -393,7 +393,7 @@ class SequenceMap(object):
         else:
             d, s = {}, {}
             other_domain = set(other.keys()).difference(set(self.keys()))
-            for k in self.keys():
+            for k in list(self.keys()):
                 d[k] = self.map[k]
                 s[k] = self.substitution_scores[k]
             for k in other_domain:
@@ -408,12 +408,12 @@ class SequenceMap(object):
     def __repr__(self):
         s = []
         substitution_scores = self.substitution_scores
-        for k, v in sorted(self.map.iteritems()):
-            if type(k) == types.StringType or type(k) == types.UnicodeType:
+        for k, v in sorted(self.map.items()):
+            if type(k) == bytes or type(k) == str:
                 key = "'%s'" % k
             else:
                 key = str(k)
-            if type(v) == types.StringType or type(v) == types.UnicodeType:
+            if type(v) == bytes or type(v) == str:
                 val = "'%s'" % v
             else:
                 val = str(v)

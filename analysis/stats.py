@@ -385,7 +385,7 @@ keymap = dict(
 def format_stats_for_printing(stats):
     s = []
     newstats = {}
-    for k, v in stats.iteritems():
+    for k, v in stats.items():
         key = keymap.get(k, k)
         if k == 'ks_2samp':
             newstats[key] = '%0.3f (2-tailed p-value=%s)' % (v[0], str(v[1]))
@@ -403,7 +403,7 @@ def format_stats_for_printing(stats):
             newstats[key] = '%0.3f (2-tailed p-value=%s)' % (v[0], str(v[1]))
         else:
             newstats[key] = '%0.3f' % v
-    for k, v in sorted(newstats.iteritems()):
+    for k, v in sorted(newstats.items()):
         s.append('%s: %s' % (str(k).ljust(32), str(v)))
     return '\n'.join(s)
 
@@ -421,8 +421,8 @@ def plot(analysis_table, output_filename, RFunction, title = ''):
         input_filename = create_csv(analysis_table)
         try:
             R_output = RFunction(input_filename, output_filename, filetype, title = title)
-        except Exception, e:
-            print(traceback.format_exc())
+        except Exception as e:
+            print((traceback.format_exc()))
             delete_file(input_filename)
             raise Exception(e)
         delete_file(input_filename)
@@ -446,8 +446,8 @@ def plot_pandas(dataframe, x_series, y_series, output_filename, RFunction, title
         new_dataframe.to_csv(csv_filename, sep = ',', header = True)
         try:
             R_output = RFunction(csv_filename, output_filename, filetype, title = title)
-        except Exception, e:
-            print(traceback.format_exc())
+        except Exception as e:
+            print((traceback.format_exc()))
             raise Exception(e)
     return output_filename
 

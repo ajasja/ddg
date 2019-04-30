@@ -32,7 +32,7 @@ def update_pdbs_json():
     '''This function was used to update the pdbs.json file to include chain sequences and types.'''
     pdb_data = {}
     pdb_data_ = json.loads(read_file(os.path.join('..', 'json', 'pdbs.json')))
-    for k, v in pdb_data_.iteritems():
+    for k, v in pdb_data_.items():
         assert(len(k) == 4)
         newk = k.upper()
         pdb = PDB(read_file(os.path.join('..', 'pdbs', newk + '.pdb')))

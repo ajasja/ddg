@@ -30,10 +30,10 @@ import types
 import string
 import types
 
-from basics import Residue, PDBResidue, Sequence, SequenceMap, residue_type_3to1_map, protonated_residue_type_3to1_map, non_canonical_amino_acids, protonated_residues_types_3, residue_types_3, Mutation, ChainMutation, SimpleMutation
-from basics import dna_nucleotides, rna_nucleotides, dna_nucleotides_3to1_map, dna_nucleotides_2to1_map, non_canonical_dna, non_canonical_rna, all_recognized_dna, all_recognized_rna
+from .basics import Residue, PDBResidue, Sequence, SequenceMap, residue_type_3to1_map, protonated_residue_type_3to1_map, non_canonical_amino_acids, protonated_residues_types_3, residue_types_3, Mutation, ChainMutation, SimpleMutation
+from .basics import dna_nucleotides, rna_nucleotides, dna_nucleotides_3to1_map, dna_nucleotides_2to1_map, non_canonical_dna, non_canonical_rna, all_recognized_dna, all_recognized_rna
 from analysis.stats import read_file, write_file
-from map_pdb_residues import get_pdb_contents_to_pose_residue_map
+from .map_pdb_residues import get_pdb_contents_to_pose_residue_map
 
 
 ### Residue types
@@ -237,7 +237,7 @@ class PDB:
         '''Takes either a pdb file, a list of strings = lines of a pdb file, or another object.'''
 
         self.pdb_content = pdb_content
-        if type(pdb_content) is types.StringType:
+        if type(pdb_content) is bytes:
             self.lines =  pdb_content.split("\n")
         else:
             self.lines = [line.strip() for line in pdb_content]
@@ -299,7 +299,7 @@ class PDB:
         # If there is a chain with a blank ID, change that ID to a valid unused ID
         if ' ' in chains:
             fresh_id = None
-            allowed_chain_ids = list(string.uppercase) + list(string.lowercase) + map(str, range(10))
+            allowed_chain_ids = list(string.uppercase) + list(string.lowercase) + list(map(str, list(range(10))))
             for c in chains:
                 try: allowed_chain_ids.remove(c)
                 except: pass
@@ -460,7 +460,7 @@ class PDB:
             modified_residue_mapping_3 = {}
 
             # Add in the patch
-            for k, v in modified_residues_patch.get(self.pdb_id, {}).iteritems():
+            for k, v in modified_residues_patch.get(self.pdb_id, {}).items():
                 modified_residue_mapping_3[k] = v
 
             for line in self.parsed_lines["MODRES"]:
@@ -565,7 +565,7 @@ class PDB:
 
             fasta_string += '>%s|%s|PDBID|CHAIN|SEQUENCE\n' % (self.pdb_id, c)
             seq = str(sequences[c])
-            for line in [seq[x:x+length] for x in xrange(0, len(seq), length)]:
+            for line in [seq[x:x+length] for x in range(0, len(seq), length)]:
                 fasta_string += line + '\n'
 
         return fasta_string
@@ -654,7 +654,7 @@ class PDB:
         return techniques
 
     def get_UniProt_ACs(self):
-        return [v['dbAccession'] for k, v in self.get_DB_references().get(self.pdb_id, {}).get('UNIPROT', {}).iteritems()]
+        return [v['dbAccession'] for k, v in self.get_DB_references().get(self.pdb_id, {}).get('UNIPROT', {}).items()]
 
     def get_DB_references(self):
         ''' "The DBREF record provides cross-reference links between PDB sequences (what appears in SEQRES record) and
@@ -785,7 +785,7 @@ class PDB:
 
             # Required (by us) fields
             molecule['MoleculeID'] = int(molecule['MoleculeID'])
-            molecule['Chains'] = map(string.strip, molecule['Chains'].split(','))
+            molecule['Chains'] = list(map(string.strip, molecule['Chains'].split(',')))
             for c in molecule['Chains']:
                 assert(len(c) == 1)
 
@@ -808,8 +808,8 @@ class PDB:
                 molecule['Mutation'] = None
 
             # Add missing fields
-            for k in COMPND_field_map.values():
-                if k not in molecule.keys():
+            for k in list(COMPND_field_map.values()):
+                if k not in list(molecule.keys()):
                     molecule[k] = None
 
             molecules[molecule['MoleculeID']] = molecule
@@ -842,7 +842,7 @@ class PDB:
             assert(MoleculeID in molecules)
             molecule = molecules[MoleculeID]
 
-            for field_name, field_data in new_molecule.iteritems():
+            for field_name, field_data in new_molecule.items():
                 if field_name != 'MoleculeID':
                     molecule[field_name] = field_data
 
@@ -858,11 +858,11 @@ class PDB:
                 raise PDBParsingException("Error parsing SYNTHETIC field of SOURCE lines. Expected 'YES' or 'NO', got '%s'." % molecule['Synthetic'])
 
             # Add missing fields
-            for k in SOURCE_field_map.values():
-                if k not in molecule.keys():
+            for k in list(SOURCE_field_map.values()):
+                if k not in list(molecule.keys()):
                     molecule[k] = None
 
-        return [v for k, v in sorted(molecules.iteritems())]
+        return [v for k, v in sorted(molecules.items())]
 
     def get_journal(self):
         if self.parsed_lines["JRNL  "]:
@@ -906,7 +906,7 @@ class PDB:
         sequences = {}
         self.chain_types = {}
 
-        for chain_id, tokens in chain_tokens.iteritems():
+        for chain_id, tokens in chain_tokens.items():
 
             # Determine whether the chain is DNA, RNA, or a protein chain
             # 1H38 is a good test for this - it contains DNA (chains E and G and repeated by H, K, N, J, M, P), RNA (chain F, repeated by I, L, O) and protein (chain D, repeated by A,B,C) sequences
@@ -993,7 +993,7 @@ class PDB:
         self.seqres_chain_order = seqres_chain_order
 
         # Create Sequence objects for the SEQRES sequences
-        for chain_id, sequence in sequences.iteritems():
+        for chain_id, sequence in sequences.items():
             self.seqres_sequences[chain_id] = Sequence.from_sequence(chain_id, sequence, self.chain_types[chain_id])
 
 
@@ -1179,7 +1179,7 @@ class PDB:
         # Apply any PDB-specific hacks
         specific_flag_hacks = None
 
-        skeletal_chains = sorted([k for k in self.chain_types.keys() if self.chain_types[k] == 'Protein skeleton'])
+        skeletal_chains = sorted([k for k in list(self.chain_types.keys()) if self.chain_types[k] == 'Protein skeleton'])
         if skeletal_chains:
             raise PDBMissingMainchainAtomsException('The PDB to Rosetta residue map could not be created as chains %s only have CA atoms present.' % ", ".join(skeletal_chains))
 
@@ -1203,14 +1203,14 @@ class PDB:
         rosetta_pdb_mappings = {}
         for chain_id in self.atom_chain_order:
             rosetta_pdb_mappings[chain_id] = {}
-        for k, v in mapping.iteritems():
+        for k, v in mapping.items():
             rosetta_residues[k[0]][v['pose_residue_id']] = v
             rosetta_pdb_mappings[k[0]][v['pose_residue_id']] = k
 
         # Create rosetta_sequences map Chain -> Sequence(Residue)
-        for chain_id, v in sorted(rosetta_residues.iteritems()):
+        for chain_id, v in sorted(rosetta_residues.items()):
             chain_type = self.chain_types[chain_id]
-            for rosetta_id, residue_info in sorted(v.iteritems()):
+            for rosetta_id, residue_info in sorted(v.items()):
                 short_residue_type = None
 
                 if chain_type == 'Protein':
@@ -1229,7 +1229,7 @@ class PDB:
 
         ## Create SequenceMap objects to map the Rosetta Sequences to the ATOM Sequences
         rosetta_to_atom_sequence_maps = {}
-        for chain_id, rosetta_pdb_mapping in rosetta_pdb_mappings.iteritems():
+        for chain_id, rosetta_pdb_mapping in rosetta_pdb_mappings.items():
             rosetta_to_atom_sequence_maps[chain_id] = SequenceMap.from_dict(rosetta_pdb_mapping)
 
         self.rosetta_to_atom_sequence_maps = rosetta_to_atom_sequence_maps
@@ -1247,14 +1247,14 @@ class PDB:
             raise Exception('The PDB to Rosetta mapping has not been determined. Please call construct_pdb_to_rosetta_residue_map first.')
 
         atom_sequence_to_rosetta_mapping = {}
-        for chain_id, mapping in self.rosetta_to_atom_sequence_maps.iteritems():
+        for chain_id, mapping in self.rosetta_to_atom_sequence_maps.items():
             chain_mapping = {}
             for k in mapping:
                 chain_mapping[k[1]] = k[0]
             atom_sequence_to_rosetta_mapping[chain_id] = SequenceMap.from_dict(chain_mapping)
 
         # Add empty maps for missing chains
-        for chain_id, sequence in self.atom_sequences.iteritems():
+        for chain_id, sequence in self.atom_sequences.items():
             if not atom_sequence_to_rosetta_mapping.get(chain_id):
                 atom_sequence_to_rosetta_mapping[chain_id] = SequenceMap()
 
@@ -1266,8 +1266,8 @@ class PDB:
         import json
         d = {}
         atom_sequence_to_rosetta_mapping = self.get_atom_sequence_to_rosetta_map()
-        for c, sm in atom_sequence_to_rosetta_mapping.iteritems():
-            for k, v in sm.map.iteritems():
+        for c, sm in atom_sequence_to_rosetta_mapping.items():
+            for k, v in sm.map.items():
                 d[k] = v
         return json.dumps(d, sort_keys = True)
 
@@ -1279,8 +1279,8 @@ class PDB:
             raise Exception('The PDB to Rosetta mapping has not been determined. Please call construct_pdb_to_rosetta_residue_map first.')
 
         d = {}
-        for c, sm in self.rosetta_to_atom_sequence_maps.iteritems():
-            for k, v in sm.map.iteritems():
+        for c, sm in self.rosetta_to_atom_sequence_maps.items():
+            for k, v in sm.map.items():
                 d[k] = v
             #d[c] = sm.map
         return json.dumps(d, sort_keys = True)
@@ -1372,7 +1372,7 @@ class PDB:
                 if resname in reslist:
                     foundRes[resname] = True
 
-        return foundRes.keys()
+        return list(foundRes.keys())
 
 
     def get_residue_id_to_type_map(self):

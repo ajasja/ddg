@@ -69,7 +69,7 @@ import datetime
 import inspect
 import multiprocessing
 import glob
-import cPickle as pickle
+import pickle as pickle
 import getpass
 import gzip
 import rosetta.parse_settings
@@ -122,8 +122,8 @@ if __name__ == '__main__':
     import pprint
     try:
         arguments = docopt.docopt(__doc__.format(**locals()))
-    except Exception, e:
-        print('Failed while parsing arguments: %s.' % str(e))
+    except Exception as e:
+        print(('Failed while parsing arguments: %s.' % str(e)))
         sys.exit(1)
 
     # Determine the output directory
@@ -141,7 +141,7 @@ if __name__ == '__main__':
                 answer = None
                 if arguments.get('--force'):
                     answer = True
-                    print('\nRunning the ddg_monomer step in %s.' % most_recent_directory)
+                    print(('\nRunning the ddg_monomer step in %s.' % most_recent_directory))
                 else:
                     answer = prompt_yn('\nNo output path was specified. Use %s (y/n)?' % most_recent_directory)
                 if not answer:
@@ -171,7 +171,7 @@ if __name__ == '__main__':
         dataset_filepath = os.path.join(output_dir, 'dataset.json')
         dataset = json.loads(read_file(dataset_filepath))
         dataset_cases = dataset['data']
-    except Exception, e:
+    except Exception as e:
         raise Exception('An error occurred parsing the JSON file: %s..' % str(e))
 
     # Run all cases with associated mutfiles
@@ -206,7 +206,7 @@ if __name__ == '__main__':
         assert(not(extra_s))
         extra_s = ' (using beta_nov15)'
 
-    print('Creating constraint files...%s' % extra_s)
+    print(('Creating constraint files...%s' % extra_s))
     constraints_files, preminimized_structures = create_constraints_files(preminimized_pdb_data_dir, constraints_data_dir)
 
     number_of_structural_pairs = arguments['--num_struct'][0]
@@ -244,7 +244,7 @@ if __name__ == '__main__':
     # Keep a copy of the preminimization step pickle for debugging
     pickle_file = os.path.join(output_data_dir, 'job_dict.pickle')
     if os.path.exists(pickle_file):
-        existing_job_keys = pickle.load(open(pickle_file, 'r')).keys()
+        existing_job_keys = list(pickle.load(open(pickle_file, 'r')).keys())
         for k in existing_job_keys:
             if k.startswith(preminimization_task_subfolder):
                 shutil.copy(pickle_file, os.path.join(output_data_dir, '%s_step_dict.pickle' % preminimization_task_subfolder))
@@ -276,12 +276,12 @@ if __name__ == '__main__':
 
     write_run_file(settings)
     job_path = os.path.abspath(output_dir)
-    print('''Job files written to directory: %s.\n\nTo launch this job locally (this will take some time):
+    print(('''Job files written to directory: %s.\n\nTo launch this job locally (this will take some time):
     cd %s
     python %s.py
 
 It is recommended to run this on an SGE cluster in which case use these commands instead:
     cd %s
-    qsub %s.py\n''' % (job_path, job_path, generated_scriptname, job_path, generated_scriptname))
+    qsub %s.py\n''' % (job_path, job_path, generated_scriptname, job_path, generated_scriptname)))
 
 

@@ -25,7 +25,7 @@
 
 
 import re
-from basics import SimpleMutation
+from .basics import SimpleMutation
 
 
 class RosettaFileParsingException(Exception): pass

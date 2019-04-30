@@ -120,7 +120,7 @@ import traceback
 import shlex
 import copy
 import pandas
-import StringIO
+import io
 from rosetta.write_run_file import process as write_run_file
 from analysis.libraries import docopt
 from analysis.libraries import colortext
@@ -208,7 +208,7 @@ class BenchmarkManager(ReportingObject):
             try:
                 os.mkdir(self.analysis_directory)
                 assert(os.path.exists(self.analysis_directory))
-            except Exception, e:
+            except Exception as e:
                 raise colortext.Exception('An exception occurred creating the directory %s.' % self.analysis_directory)
 
         # Plot-generation option
@@ -231,9 +231,9 @@ class BenchmarkManager(ReportingObject):
         try:
             self.burial_cutoff = float(arguments['--burial_cutoff'])
             if 0.0 > self.burial_cutoff or self.burial_cutoff > 1.0: raise Exception()
-        except ValueError, e:
+        except ValueError as e:
             raise colortext.Exception('burial_cutoff must be a float value.')
-        except Exception, e:
+        except Exception as e:
             raise colortext.Exception('burial_cutoff must be between 0.0 and 1.0 (inclusive).')
 
         # cap_prediction option. This is used to cap predicted values and ameliorate the effect of outliers on correlation i.e. cheat!
@@ -241,14 +241,14 @@ class BenchmarkManager(ReportingObject):
             self.prediction_cap = None
             if arguments['--cap_predictions']:
                 self.prediction_cap = abs(float(arguments['--cap_predictions']))
-        except ValueError, e:
+        except ValueError as e:
             raise colortext.Exception('cap_predictions must be a float value.')
 
         # stability classication cutoff values
         try:
             self.stability_classication_x_cutoff = abs(float(arguments['--scx_cutoff']))
             self.stability_classication_y_cutoff = abs(float(arguments['--scy_cutoff']))
-        except ValueError, e:
+        except ValueError as e:
             raise colortext.Exception('The stability classification cutoffs (--scx_cutoff, --scy_cutoff) must be float values.')
 
 
@@ -282,7 +282,7 @@ class BenchmarkManager(ReportingObject):
                 raise colortext.Exception('The file {0} does not exist.'.format(benchmark_run_json))
             try:
                 benchmark_run_json = json.loads(read_file(benchmark_run_json))
-            except Exception, e:
+            except Exception as e:
                 raise colortext.Exception('An error occurred parsing {0}: "{1}".'.format(benchmark_run_json, str(e)))
 
             try:
@@ -306,7 +306,7 @@ class BenchmarkManager(ReportingObject):
                 benchmark_run_names = [x[2] for x in benchmark_json_runs]
                 benchmark_run_descriptions = [x[3] for x in benchmark_json_runs]
                 benchmark_run_credits = [x[4] for x in benchmark_json_runs]
-            except Exception, e:
+            except Exception as e:
                 raise colortext.Exception('An error occurred parsing {0}: "{1}".'.format(benchmark_run_json, str(e)))
         else:
             # If benchmarks were chosen, make sure the directories exist and have corresponding names. Otherwise, use the most recent run.
@@ -385,7 +385,7 @@ class BenchmarkManager(ReportingObject):
                 dataset_cases = {}
                 for dsc in dataset['data']:
                     dataset_cases[dsc['RecordID']] = dsc
-            except Exception, e:
+            except Exception as e:
                 raise colortext.Exception('An error occurred parsing the JSON file: %s..' % str(e))
 
             # Read the previously extracted benchmark data and structural scores (benchmark_data.json) from file or create that file if it does not exist
@@ -413,7 +413,7 @@ class BenchmarkManager(ReportingObject):
                 self.log('\r...loading', colortext.wyellow)
                 if not self.silent: sys.stdout.flush()
                 analysis_data_ = json.loads(read_file(benchmark_data_filepath))
-                for k, v in analysis_data_.iteritems():
+                for k, v in analysis_data_.items():
                     analysis_data[int(k)] = v
                 self.log('\r', colortext.wgrey)
                 if not self.silent: sys.stdout.flush()
@@ -449,12 +449,12 @@ class BenchmarkManager(ReportingObject):
         # todo: add published data here
 
         # Create the dataframes for each benchmark
-        for benchmark_run_name, br in sorted(self.benchmark_run_data.iteritems()):
+        for benchmark_run_name, br in sorted(self.benchmark_run_data.items()):
             self.log('\nExtracting the run-data the analysis for {0}.'.format(benchmark_run_name), colortext.message)
             br.create_dataframe()
 
         # Run the individual analysis
-        for benchmark_run_name, br in sorted(self.benchmark_run_data.iteritems()):
+        for benchmark_run_name, br in sorted(self.benchmark_run_data.items()):
             self.log('\nRunning the analysis for {0}.'.format(benchmark_run_name), colortext.message)
             br.analyze()
 
@@ -479,7 +479,7 @@ class BenchmarkManager(ReportingObject):
         scores['Errors'] = BenchmarkManager.extract_errors(rosetta_output_lines)
         scores['DDG'] = BenchmarkManager.extract_predicted_ddg(rosetta_output_lines)
         scores['DDG_components'] = BenchmarkManager.extract_summary_data(ddg_output_path)
-        for k, v in BenchmarkManager.get_ddg_monomer_scores_per_structure(rosetta_output_lines).iteritems():
+        for k, v in BenchmarkManager.get_ddg_monomer_scores_per_structure(rosetta_output_lines).items():
             assert(k not in scores)
             scores[k] = v
 
@@ -490,8 +490,8 @@ class BenchmarkManager(ReportingObject):
             # This case should rarely occur unless take_lowest is set too high or a small number of structures was created
             fair_top = min(x, len(scores['Mutant_scores']), len(scores['WildType_scores']))
             if fair_top > 0:
-                avg_top_mutant_scores = sum(sorted([components['total'] for id, components in scores['Mutant_scores'].iteritems()])[:fair_top])/float(fair_top)
-                avg_top_wildtype_scores = sum(sorted([components['total'] for id, components in scores['WildType_scores'].iteritems()])[:fair_top])/float(fair_top)
+                avg_top_mutant_scores = sum(sorted([components['total'] for id, components in scores['Mutant_scores'].items()])[:fair_top])/float(fair_top)
+                avg_top_wildtype_scores = sum(sorted([components['total'] for id, components in scores['WildType_scores'].items()])[:fair_top])/float(fair_top)
                 scores['DDG_Top%d' % x] = avg_top_mutant_scores - avg_top_wildtype_scores
                 if prediction_cap != None:
                     if scores['DDG_Top%d' % x] < -prediction_cap:
@@ -605,11 +605,11 @@ class BenchmarkManager(ReportingObject):
         # by increasing energy so that each sublist contains structure IDs of equal energy and if structures have the same
         # energy then their IDs are in the same sublist
         d = {}
-        for structure_id, scores in sorted(mutant_scores.iteritems()):
+        for structure_id, scores in sorted(mutant_scores.items()):
             d[scores['total']] = d.get(scores['total'], [])
             d[scores['total']].append(structure_id)
         MutantScoreOrder = []
-        for score, structure_ids in sorted(d.iteritems()):
+        for score, structure_ids in sorted(d.items()):
             MutantScoreOrder.append(structure_ids)
 
         # Sanity check - make sure that MutantScoreOrder is really ordered such that each set of structure IDs contains
@@ -628,11 +628,11 @@ class BenchmarkManager(ReportingObject):
         # score, we could have multiple wildtype structures to choose from. In this case, we choose a pair where the wildtype
         # structure has the minimal total score.
 
-        lowest_mutant_score = min([v['total'] for k, v in mutant_scores.iteritems()])
-        mutant_structure_ids  = [k for k, v in mutant_scores.iteritems() if v['total'] == lowest_mutant_score]
+        lowest_mutant_score = min([v['total'] for k, v in mutant_scores.items()])
+        mutant_structure_ids  = [k for k, v in mutant_scores.items() if v['total'] == lowest_mutant_score]
         if len(mutant_structure_ids) > 1:
-            lowest_wildtype_score = min([v['total'] for k, v in wildtype_scores.iteritems() if k in mutant_structure_ids])
-            lowest_scoring_pair_id = sorted([k for k, v in wildtype_scores.iteritems() if v['total'] == lowest_wildtype_score])[0] # this is deterministic but there could potentially be multiple valid IDs
+            lowest_wildtype_score = min([v['total'] for k, v in wildtype_scores.items() if k in mutant_structure_ids])
+            lowest_scoring_pair_id = sorted([k for k, v in wildtype_scores.items() if v['total'] == lowest_wildtype_score])[0] # this is deterministic but there could potentially be multiple valid IDs
         else:
             lowest_scoring_pair_id = mutant_structure_ids[0]
 
@@ -767,7 +767,7 @@ class BenchmarkRun(ReportingObject):
             try:
                 os.mkdir(self.subplot_directory)
                 assert(os.path.exists(self.subplot_directory))
-            except Exception, e:
+            except Exception as e:
                 raise colortext.Exception('An exception occurred creating the subplot directory %s.' % self.subplot_directory)
 
 
@@ -830,13 +830,13 @@ class BenchmarkRun(ReportingObject):
         pdb_data = {}
         try:
             pdb_data_ = json.loads(read_file('../../input/json/pdbs.json'))
-            for k, v in pdb_data_.iteritems():
+            for k, v in pdb_data_.items():
                 pdb_data[k.upper()] = v
-        except Exception, e:
+        except Exception as e:
             self.log('input/json/pdbs.json could not be found - PDB-specific analysis cannot be performed.', colortext.error)
 
         # Create the dataframe
-        for record_id, predicted_data in sorted(analysis_data.iteritems()):
+        for record_id, predicted_data in sorted(analysis_data.items()):
 
             record = dataset_cases[record_id]
 
@@ -990,7 +990,7 @@ class BenchmarkRun(ReportingObject):
             assert(sorted(csv_headers) == sorted(dataframe_record.keys()))
 
         # Create the CSV file in memory (we are not done added data just yet) and pass it to pandas
-        dataframe = pandas.read_csv(StringIO.StringIO('\n'.join(csv_file)), sep=',', header=0, skip_blank_lines=True, index_col = 0)
+        dataframe = pandas.read_csv(io.StringIO('\n'.join(csv_file)), sep=',', header=0, skip_blank_lines=True, index_col = 0)
         self.dataframe = dataframe
 
         # Report the SCOPe classification counts
@@ -1017,8 +1017,8 @@ class BenchmarkRun(ReportingObject):
         indices = dataframe.index.values.tolist()
         for i in indices:
             json_records[i] = {}
-        for k, v in dataframe.to_dict().iteritems():
-            for i, v in v.iteritems():
+        for k, v in dataframe.to_dict().items():
+            for i, v in v.items():
                 assert(k not in json_records[i])
                 json_records[i][k] = v
         write_file(self.analysis_json_input_filepath, json.dumps(json_records, indent = 4, sort_keys=True))
@@ -1063,13 +1063,13 @@ class BenchmarkRun(ReportingObject):
 
         # This dict is used for the print-statement below
         volume_groups = {}
-        for aa_code, aa_details in amino_acid_details.iteritems():
+        for aa_code, aa_details in amino_acid_details.items():
             v = int(aa_details['van der Waals volume']) # Note: I only convert to int here to match the old script behavior and because all volumes are integer values so it does not do any harm
             volume_groups[v] = volume_groups.get(v, [])
             volume_groups[v].append(aa_code)
 
         metrics_textfile.append('\n\nSection 1. Breakdown by volume.')
-        metrics_textfile.append('A case is considered a small-to-large (resp. large-to-small) mutation if all of the wildtype residues have a smaller (resp. larger) van der Waals volume than the corresponding mutant residue. The order is defined as %s so some cases are considered to have no change in volume e.g. MET -> LEU.' % (' < '.join([''.join(sorted(v)) for k, v in sorted(volume_groups.iteritems())])))
+        metrics_textfile.append('A case is considered a small-to-large (resp. large-to-small) mutation if all of the wildtype residues have a smaller (resp. larger) van der Waals volume than the corresponding mutant residue. The order is defined as %s so some cases are considered to have no change in volume e.g. MET -> LEU.' % (' < '.join([''.join(sorted(v)) for k, v in sorted(volume_groups.items())])))
         self.report('\n'.join(metrics_textfile[-2:]), fn = colortext.sprint)
         for subcase in ('XX', 'SL', 'LS'):
             subcase_dataframe = dataframe[dataframe['VolumeChange'] == subcase]
@@ -1157,7 +1157,7 @@ class BenchmarkRun(ReportingObject):
             plot_pandas(dataframe, 'Experimental', 'Predicted', main_scatterplot, RInterface.correlation_coefficient_gplot, title = 'Experimental vs. Prediction')
 
         if self.prediction_cap != None:
-            graph_order.append(self.create_section_slide('{0}section_1.png'.format(self.analysis_file_prefix), 'Main metrics', subtitle, self.credit, 'Predictions capped at \u00b1{0} energy units'.format(self.prediction_cap)))
+            graph_order.append(self.create_section_slide('{0}section_1.png'.format(self.analysis_file_prefix), 'Main metrics', subtitle, self.credit, 'Predictions capped at \\u00b1{0} energy units'.format(self.prediction_cap)))
         else:
             graph_order.append(self.create_section_slide('{0}section_1.png'.format(self.analysis_file_prefix), 'Main metrics', subtitle, self.credit))
         graph_order.append(main_scatterplot)
@@ -1283,7 +1283,7 @@ class BenchmarkRun(ReportingObject):
         R_filename = os.path.splitext(plot_filename)[0] + '.R'
 
         title_size = 8
-        longest_line = max(map(len, title.split('\n')))
+        longest_line = max(list(map(len, title.split('\n'))))
         if longest_line <= 11:
             title_size = 16
         elif longest_line <= 16:
@@ -1292,7 +1292,7 @@ class BenchmarkRun(ReportingObject):
             title_size = 10
 
         subtitle_size = 6
-        longest_line = max(map(len, subtitle.split('\n')))
+        longest_line = max(list(map(len, subtitle.split('\n'))))
         if longest_line <= 11:
             subtitle_size = 16
         elif longest_line <= 16:
@@ -1822,14 +1822,14 @@ plot_scale <- scale_color_manual(
 if __name__ == '__main__':
     try:
         arguments = docopt.docopt(__doc__.format(**locals()))
-    except Exception, e:
-        print('Failed while parsing arguments: %s.' % str(e))
+    except Exception as e:
+        print(('Failed while parsing arguments: %s.' % str(e)))
         sys.exit(1)
 
     try:
         bm = BenchmarkManager(arguments)
         bm.analyze()
-    except Exception, e:
+    except Exception as e:
         colortext.error(str(e))
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
 

@@ -49,12 +49,12 @@ def process(data_dict):
 
     for arg in required_arguments:
         if arg not in data_dict:
-            print 'ERROR: Data dictionary missing argument', arg
+            print('ERROR: Data dictionary missing argument', arg)
             sys.exit(1)
 
     for arg in unrequired_arguments:
         if arg in data_dict:
-            print 'ERROR: Data dictionary cannot contain argument', arg
+            print('ERROR: Data dictionary cannot contain argument', arg)
             sys.exit(1)
 
     # Complete appname
@@ -68,7 +68,7 @@ def process(data_dict):
         data_dict['extra_ld_path'] = ''
 
     # Handle if general rosetta args are a list instead of a string
-    if not isinstance(data_dict['rosetta_args_list'], basestring):
+    if not isinstance(data_dict['rosetta_args_list'], str):
         rosetta_args = ""
         if len(data_dict['rosetta_args_list']) == 1:
             rosetta_args += "'%s'" % data_dict['rosetta_args_list']

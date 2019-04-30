@@ -51,7 +51,7 @@ import shutil
 import sys
 import time
 import inspect
-import cPickle as pickle
+import pickle as pickle
 import re
 import getpass
 import interfaces_defs
@@ -257,8 +257,8 @@ if __name__ == "__main__":
     import pprint
     try:
         arguments = docopt.docopt(__doc__.format(**locals()))
-    except Exception, e:
-        print('Failed while parsing arguments: %s.' % str(e))
+    except Exception as e:
+        print(('Failed while parsing arguments: %s.' % str(e)))
         sys.exit(1)
 
     if arguments.get('--output_directory'):
@@ -372,4 +372,4 @@ if __name__ == "__main__":
 
     write_run_file(settings)
 
-    print 'Job files written to directory:', os.path.abspath(output_dir)
+    print('Job files written to directory:', os.path.abspath(output_dir))
