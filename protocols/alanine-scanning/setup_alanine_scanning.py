@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # The MIT License (MIT)
 #
@@ -359,7 +359,7 @@ if __name__ == "__main__":
 
                 job_dict[ '%s/%s/%s' % (pdb_id.upper(), PDBPosID, score_fxn) ] = sub_dict
 
-    with open(os.path.join(output_data_dir, 'job_dict.pickle'), 'w') as f:
+    with open(os.path.join(output_data_dir, 'job_dict.pickle'), 'wb') as f:
         pickle.dump(job_dict, f)
 
     settings['scriptname'] = 'alascan_run'

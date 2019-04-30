@@ -102,7 +102,7 @@ def find_resnums_around_mutation(pdb_id, resnum, insertion_code, chain):
 
 def get_close_residues_dict():
     if os.path.isfile('.close_residues.pickle'):
-        with open('.close_residues.pickle', 'r') as f:
+        with open('.close_residues.pickle', 'rb') as f:
             return pickle.load(f)
 
     mut_data_dict = setup_alanine_scanning.parse_mutations_file()
@@ -123,7 +123,7 @@ def get_close_residues_dict():
             assert( reskey not in close_residues_dict[pdb_id] )
             close_residues_dict[pdb_id][reskey] = close_residues
 
-    with open('.close_residues.pickle', 'w') as f:
+    with open('.close_residues.pickle', 'wb') as f:
         pickle.dump(close_residues_dict, f)
 
     return close_residues_dict
