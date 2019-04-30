@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # The MIT License (MIT)
 #
@@ -36,8 +36,8 @@
 import socket
 import sys
 
-print "Python version:", sys.version
-print "Hostname:", socket.gethostname()
+print("Python version:", sys.version)
+print("Hostname:", socket.gethostname())
 
 from datetime import *
 import os
@@ -53,12 +53,12 @@ import math
 try:
     import cPickle as pickle
 except:
-    print 'cPickle not available, using regular pickle module'
+    print ('cPickle not available, using regular pickle module')
     import pickle
 
 script_name = '#$#scriptname#$#.py'
 
-print "Script:", script_name
+print("Script:", script_name)
 
 # Constants
 tasks_per_process = #$#tasks_per_process#$#
@@ -84,13 +84,13 @@ generic_rosetta_args = [
 sge_task_id = 0
 run_locally = True
 run_on_sge = False
-if os.environ.has_key("SGE_TASK_ID"):
+if "SGE_TASK_ID" in os.environ:
     sge_task_id = long(os.environ["SGE_TASK_ID"])
     run_locally = False
     run_on_sge = True
 
 job_id = 0
-if os.environ.has_key("JOB_ID"):
+if "JOB_ID" in os.environ:
     job_id=long(os.environ["JOB_ID"])
 
 def roundTime(dt=None, roundTo=1):
@@ -126,7 +126,7 @@ class Reporter:
         self.n = 0
         self.completion_time = None
         if self.print_output:
-            print '\nStarting ' + task
+            print ('\nStarting ' + task)
         self.total_count = None # Total tasks to be processed
     def set_total_count(self, x):
         self.total_count = x
@@ -142,9 +142,9 @@ class Reporter:
                 time_remaining = est_total_time - (time_now-self.start)
                 minutes_remaining = math.floor(time_remaining/60.0)
                 seconds_remaining = int(time_remaining-(60*minutes_remaining))
-                print "  Processed: "+str(n)+" "+self.entries+" (%.1f%%) %02d:%02d" % (percent_done*100.0, minutes_remaining, seconds_remaining)
+                print ("  Processed: "+str(n)+" "+self.entries+" (%.1f%%) %02d:%02d" % (percent_done*100.0, minutes_remaining, seconds_remaining))
             else:
-                print "  Processed: "+str(n)+" "+self.entries
+                print ("  Processed: "+str(n)+" "+self.entries)
 
     def increment_report(self):
         self.report(self.n+1)
@@ -155,7 +155,7 @@ class Reporter:
     def done(self):
         self.completion_time = time.time()
         if self.print_output:
-            print 'Done %s, processed %d %s, took %.3f seconds\n' % (self.task,self.n,self.entries,self.completion_time-self.start)
+            print ('Done %s, processed %d %s, took %.3f seconds\n' % (self.task,self.n,self.entries,self.completion_time-self.start))
     def elapsed_time(self):
         if self.completion_time:
             return self.completion_time - self.start
@@ -168,11 +168,11 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
     time_start = roundTime()
 
     if verbosity >= 1:
-        print 'Starting time:',time_start
-        print 'Task id:',task_id
+        print ('Starting time:',time_start)
+        print ('Task id:',task_id)
 
     if os.path.isfile(job_pickle_file):
-        p = open(job_pickle_file,'r')
+        p = open(job_pickle_file,'rb')
         job_dict = pickle.load(p)
         p.close()
 
@@ -181,7 +181,7 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
     job_dir = job_dirs[task_id]
 
     if verbosity >= 1:
-        print 'Job dir:', job_dir
+        print ('Job dir:', job_dir)
 
     # Make temporary directories
     if not os.path.isdir(scratch_dir):
@@ -190,8 +190,8 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
     tmp_output_dir = tempfile.mkdtemp(prefix='%d.%d_output_' % (job_id,task_id), dir=scratch_dir)
 
     if verbosity >= 1:
-        print 'Temporary data dir:', tmp_data_dir
-        print 'Temporary output dir:', tmp_output_dir
+        print ('Temporary data dir:', tmp_data_dir)
+        print ('Temporary output dir:', tmp_output_dir)
 
     args=[
         os.path.join(rosetta_bin, app_name),
@@ -207,7 +207,7 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
         shutil.copy(original_file, new_file)
         value = os.path.relpath(new_file, tmp_output_dir)
         if verbosity>=1:
-            print 'Copied file to local scratch:', os.path.basename(original_file)
+            print ('Copied file to local scratch:', os.path.basename(original_file))
         return value
 
     flags_dict = job_dict[job_dir]
@@ -250,7 +250,7 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
             shutil.copytree(original_dir, new_dir)
             value = os.path.relpath(new_dir, tmp_output_dir)
             if verbosity >= 1:
-                print 'Copied dir to local scratch:', os.path.basename(original_dir)
+                print ('Copied dir to local scratch:', os.path.basename(original_dir))
 
         if not isinstance(flags_dict[flag], basestring):
             # Is a list
@@ -283,9 +283,9 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
     outfile_path = os.path.join(tmp_output_dir,'rosetta.out')
     
     if verbosity >= 1:
-        print 'Args:'
-        print args
-        print ''
+        print ('Args:')
+        print (args)
+        print ('')
 
     # Run Rosetta
     rosetta_outfile = open(outfile_path, 'w')
@@ -313,13 +313,13 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
     rosetta_outfile.close()
 
     if verbosity>=1:
-        print 'Rosetta return code:', return_code, '\n'
+        print ('Rosetta return code:', return_code, '\n')
 
     if zip_rosetta_output and os.path.isfile(outfile_path):
         zip_file(outfile_path)
 
     if not os.path.isdir(job_dir_path):
-        print 'Making new job output directory: ', job_dir_path
+        print('Making new job output directory: ', job_dir_path)
         os.makedirs(job_dir_path)
 
     # Move files to job_dir from scratch dir recursively
@@ -355,7 +355,7 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
             shutil.move("%s.o%d.%d" % (script_name,job_id,sge_task_id), job_dir_path)
             shutil.move("%s.e%d.%d" % (script_name,job_id,sge_task_id), job_dir_path)
         except IOError:
-            print 'Failed moving script files, check stored name'
+            print ('Failed moving script files, check stored name')
 
         qstat_p = subprocess.Popen(['/usr/local/sge/bin/linux-x64/qstat', '-j', '%d' % job_id],
                                    stdout=subprocess.PIPE)
@@ -371,10 +371,10 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
 
     time_end = roundTime()
     if verbosity>=1:
-        print 'Ending time:', time_end
-        print "Elapsed time:", time_end-time_start
+        print ('Ending time:', time_end)
+        print ("Elapsed time:", time_end-time_start)
         if ram_usage:
-            print 'Max virtual memory usage: %.1f%s' % (ram_usage, ram_usage_type)
+            print ('Max virtual memory usage: %.1f%s' % (ram_usage, ram_usage_type) )
 
     return time_end
 
@@ -417,14 +417,14 @@ def run_local():
     worker = MultiWorker('running script locally', run_single)
 
     if os.path.isfile(job_pickle_file):
-        p = open(job_pickle_file, 'r')
+        p = open(job_pickle_file, 'rb')
         job_dict = pickle.load(p)
         p.close()
 
     num_jobs = len(job_dict.keys())
     worker.reporter.set_total_count(num_jobs)
 
-    for i in xrange(0, num_jobs): # Manually specify which jobs to run here, if you desire. Or pass as argument
+    for i in range(0, num_jobs): # Manually specify which jobs to run here, if you desire. Or pass as argument
         if jobs_to_run and i >= jobs_to_run:
             break
         worker.addJob( (i, local_rosetta_bin, local_rosetta_db, local_scratch_dir, 1) )
@@ -441,11 +441,11 @@ def run_cluster():
     )
 
     if len(tasks_to_run) == 0:
-        print 'ERROR: No tasks to run!!!'
+        print ('ERROR: No tasks to run!!!')
 
     for i, task_id in enumerate(tasks_to_run):
         if len(tasks_to_run) != 1:
-            print 'Running subtask %d (%d of %d)' % (task_id, i+1, len(tasks_to_run))
+            print ('Running subtask %d (%d of %d)' % (task_id, i+1, len(tasks_to_run)))
         if i+1 == len(tasks_to_run):
             run_single(task_id, cluster_rosetta_bin, cluster_rosetta_db, scratch_dir='/scratch', move_output_files=True)
         else:

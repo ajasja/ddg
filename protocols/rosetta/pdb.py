@@ -460,7 +460,7 @@ class PDB:
             modified_residue_mapping_3 = {}
 
             # Add in the patch
-            for k, v in modified_residues_patch.get(self.pdb_id, {}).items():
+            for k, v in list(modified_residues_patch.get(self.pdb_id, {}).items()):
                 modified_residue_mapping_3[k] = v
 
             for line in self.parsed_lines["MODRES"]:
@@ -654,7 +654,7 @@ class PDB:
         return techniques
 
     def get_UniProt_ACs(self):
-        return [v['dbAccession'] for k, v in self.get_DB_references().get(self.pdb_id, {}).get('UNIPROT', {}).items()]
+        return [v['dbAccession'] for k, v in list(self.get_DB_references().get(self.pdb_id, {}).get('UNIPROT', {}).items())]
 
     def get_DB_references(self):
         ''' "The DBREF record provides cross-reference links between PDB sequences (what appears in SEQRES record) and
@@ -842,7 +842,7 @@ class PDB:
             assert(MoleculeID in molecules)
             molecule = molecules[MoleculeID]
 
-            for field_name, field_data in new_molecule.items():
+            for field_name, field_data in list(new_molecule.items()):
                 if field_name != 'MoleculeID':
                     molecule[field_name] = field_data
 
@@ -906,7 +906,7 @@ class PDB:
         sequences = {}
         self.chain_types = {}
 
-        for chain_id, tokens in chain_tokens.items():
+        for chain_id, tokens in list(chain_tokens.items()):
 
             # Determine whether the chain is DNA, RNA, or a protein chain
             # 1H38 is a good test for this - it contains DNA (chains E and G and repeated by H, K, N, J, M, P), RNA (chain F, repeated by I, L, O) and protein (chain D, repeated by A,B,C) sequences
@@ -993,7 +993,7 @@ class PDB:
         self.seqres_chain_order = seqres_chain_order
 
         # Create Sequence objects for the SEQRES sequences
-        for chain_id, sequence in sequences.items():
+        for chain_id, sequence in list(sequences.items()):
             self.seqres_sequences[chain_id] = Sequence.from_sequence(chain_id, sequence, self.chain_types[chain_id])
 
 
@@ -1203,7 +1203,7 @@ class PDB:
         rosetta_pdb_mappings = {}
         for chain_id in self.atom_chain_order:
             rosetta_pdb_mappings[chain_id] = {}
-        for k, v in mapping.items():
+        for k, v in list(mapping.items()):
             rosetta_residues[k[0]][v['pose_residue_id']] = v
             rosetta_pdb_mappings[k[0]][v['pose_residue_id']] = k
 
@@ -1229,7 +1229,7 @@ class PDB:
 
         ## Create SequenceMap objects to map the Rosetta Sequences to the ATOM Sequences
         rosetta_to_atom_sequence_maps = {}
-        for chain_id, rosetta_pdb_mapping in rosetta_pdb_mappings.items():
+        for chain_id, rosetta_pdb_mapping in list(rosetta_pdb_mappings.items()):
             rosetta_to_atom_sequence_maps[chain_id] = SequenceMap.from_dict(rosetta_pdb_mapping)
 
         self.rosetta_to_atom_sequence_maps = rosetta_to_atom_sequence_maps
@@ -1247,14 +1247,14 @@ class PDB:
             raise Exception('The PDB to Rosetta mapping has not been determined. Please call construct_pdb_to_rosetta_residue_map first.')
 
         atom_sequence_to_rosetta_mapping = {}
-        for chain_id, mapping in self.rosetta_to_atom_sequence_maps.items():
+        for chain_id, mapping in list(self.rosetta_to_atom_sequence_maps.items()):
             chain_mapping = {}
             for k in mapping:
                 chain_mapping[k[1]] = k[0]
             atom_sequence_to_rosetta_mapping[chain_id] = SequenceMap.from_dict(chain_mapping)
 
         # Add empty maps for missing chains
-        for chain_id, sequence in self.atom_sequences.items():
+        for chain_id, sequence in list(self.atom_sequences.items()):
             if not atom_sequence_to_rosetta_mapping.get(chain_id):
                 atom_sequence_to_rosetta_mapping[chain_id] = SequenceMap()
 
@@ -1266,8 +1266,8 @@ class PDB:
         import json
         d = {}
         atom_sequence_to_rosetta_mapping = self.get_atom_sequence_to_rosetta_map()
-        for c, sm in atom_sequence_to_rosetta_mapping.items():
-            for k, v in sm.map.items():
+        for c, sm in list(atom_sequence_to_rosetta_mapping.items()):
+            for k, v in list(sm.map.items()):
                 d[k] = v
         return json.dumps(d, sort_keys = True)
 
@@ -1279,8 +1279,8 @@ class PDB:
             raise Exception('The PDB to Rosetta mapping has not been determined. Please call construct_pdb_to_rosetta_residue_map first.')
 
         d = {}
-        for c, sm in self.rosetta_to_atom_sequence_maps.items():
-            for k, v in sm.map.items():
+        for c, sm in list(self.rosetta_to_atom_sequence_maps.items()):
+            for k, v in list(sm.map.items()):
                 d[k] = v
             #d[c] = sm.map
         return json.dumps(d, sort_keys = True)

@@ -62,7 +62,7 @@ residue_type_3to1_map = {
 }
 
 residue_type_1to3_map = {}
-for k, v in residue_type_3to1_map.items():
+for k, v in list(residue_type_3to1_map.items()):
     residue_type_1to3_map[v] = k
 
 residue_types_3 = set(residue_type_3to1_map.keys())
@@ -255,7 +255,7 @@ class Sequence(object):
     def set_type(self, sequence_type):
         '''Set the type of a Sequence if it has not been set.'''
         if not(self.sequence_type):
-            for id, r in self.sequence.items():
+            for id, r in list(self.sequence.items()):
                 assert(r.residue_type == None)
                 r.residue_type = sequence_type
             self.sequence_type = sequence_type
@@ -285,7 +285,7 @@ class SequenceMap(object):
 
     @staticmethod
     def from_dict(d):
-        for k, v in d.items():
+        for k, v in list(d.items()):
             assert(type(k) == int or type(k) == bytes or type(k) == str)
             assert(type(v) == int or type(v) == bytes or type(v) == str)
         s = SequenceMap()

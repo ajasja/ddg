@@ -49,12 +49,12 @@ def process(data_dict):
 
     for arg in required_arguments:
         if arg not in data_dict:
-            print('ERROR: Data dictionary missing argument', arg)
+            print(('ERROR: Data dictionary missing argument', arg))
             sys.exit(1)
 
     for arg in unrequired_arguments:
         if arg in data_dict:
-            print('ERROR: Data dictionary cannot contain argument', arg)
+            print(('ERROR: Data dictionary cannot contain argument', arg))
             sys.exit(1)
 
     # Complete appname

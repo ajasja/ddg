@@ -385,7 +385,7 @@ keymap = dict(
 def format_stats_for_printing(stats):
     s = []
     newstats = {}
-    for k, v in stats.items():
+    for k, v in list(stats.items()):
         key = keymap.get(k, k)
         if k == 'ks_2samp':
             newstats[key] = '%0.3f (2-tailed p-value=%s)' % (v[0], str(v[1]))
