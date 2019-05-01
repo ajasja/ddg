@@ -225,7 +225,7 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
         if flag == '-parser:script_vars':
             args.append(flag)
             script_vars = flags_dict[flag]
-            assert( not isinstance(script_vars, basestring) )
+            assert( not isinstance(script_vars, str) )
             for varstring in script_vars:
                 assert( '=' in varstring )
                 name, value = varstring.split('=')
@@ -252,7 +252,7 @@ def run_single(task_id, rosetta_bin, rosetta_db, scratch_dir=local_scratch_dir, 
             if verbosity >= 1:
                 print ('Copied dir to local scratch:', os.path.basename(original_dir))
 
-        if not isinstance(flags_dict[flag], basestring):
+        if not isinstance(flags_dict[flag], str):
             # Is a list
             for list_item in flags_dict[flag]:
                 args.append(list_item)
@@ -475,6 +475,7 @@ def unzip_file(file_path):
 
 if __name__=='__main__':
     if run_locally:
+        print()
         run_local()
     else:
         run_cluster()
