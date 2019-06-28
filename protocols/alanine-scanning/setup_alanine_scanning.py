@@ -65,8 +65,10 @@ extra_name = '' # something like _talaris if needed
 mutations_file_location = 'mutation_benchmark_set.csv'
 rosetta_scripts_protocol = 'alascan.xml'
 resfile_start = 'NATRO\nEX 1 EX 2 EX 3\nSTART\n'
-score_fxns = ['talaris2014', 'score12', 'interface']
-repack_score_fxns = ['talaris2014', 'score12', 'talaris2014']
+#score_fxns = ['talaris2014', 'score12', 'interface']
+#repack_score_fxns = ['talaris2014', 'score12', 'talaris2014']
+score_fxns = ['talaris2014']
+repack_score_fxns = ['talaris2014']
 job_output_directory = 'job_output' # Default if not specified via options
 number_scan_repeats = 1
 

@@ -1,4 +1,4 @@
-<!--
+<ROSETTASCRIPTS><!--
 # The MIT License (MIT)
 #
 # Copyright (c) 2015 Kyle A. Barlow
@@ -22,34 +22,33 @@
 # THE SOFTWARE.
 -->
 
-<ROSETTASCRIPTS>
         <SCOREFXNS>
-	   <fa_talaris2014 weights=talaris2014/>
-	   <fa_interface weights=interface/>
+	   <ScoreFunction name="fa_talaris2014" weights="talaris2014"/>
+	   <ScoreFunction name="fa_interface" weights="interface"/>
         </SCOREFXNS>
 
         <TASKOPERATIONS>
-	  <ReadResfile name=rrf filename="%%pathtoresfile%%"/>
+	  <ReadResfile name="rrf" filename="%%pathtoresfile%%"/>
         </TASKOPERATIONS>
 
         <MOVERS>
-	  <MinMover name=minmover scorefxn=fa_talaris2014  chi=1 bb=1 jump=ALL cartesian=0 type=lbfgs_armijo tolerance=0.001/>
-	  <ddG name=ddgmover scorefxn=fa_talaris2014 chain_num=%%chainstomove%% repack_unbound=false repack_bound=false relax_bound=false task_operations=rrf/>
+	  <MinMover name="minmover" scorefxn="fa_talaris2014"  chi="1" bb="1" jump="ALL" cartesian="0" type="lbfgs_armijo" tolerance="0.001"/>
+	  <ddG name="ddgmover" scorefxn="fa_talaris2014" chain_num="%%chainstomove%%" repack_unbound="false" repack_bound="false" relax_bound="false" task_operations="rrf"/>
         </MOVERS>
 
         <FILTERS>
-	  <DdGScan name=alascan task_operations=rrf repeats=1 scorefxn=fa_interface report_diffs=1 write2pdb=0 ddG_mover=ddgmover />
+	  <DdGScan name="alascan" task_operations="rrf" repeats="1" scorefxn="fa_interface" report_diffs="1" write2pdb="0" ddG_mover="ddgmover" />
         </FILTERS>
 
 	<MOVERS>
-	  <ReportToDB name=alascan_reporter batch_description="interface_weights">
-	    <feature name=ResidueFeatures/>
-	    <feature name=PdbDataFeatures/>
-	    <feature name=ScoreTypeFeatures/>
-	    <feature name=ScoreFunctionFeatures scorefxn=fa_interface/>
-	    <feature name=StructureScoresFeatures scorefxn=fa_interface/>
-	    <feature name=ResidueScoresFeatures scorefxn=fa_interface/>
-	    <feature name=DdGFeatures ddG_scan_mover=alascan/>
+	  <ReportToDB name="alascan_reporter" batch_description="interface_weights">
+	    <ResidueFeatures/>
+	    <PdbDataFeatures/>
+	    <ScoreTypeFeatures/>
+	    <ScoreFunctionFeatures scorefxn="fa_interface"/>
+	    <StructureScoresFeatures scorefxn="fa_interface"/>
+	    <ResidueScoresFeatures scorefxn="fa_interface"/>
+	    <DdGFeatures ddG_scan_mover="alascan"/>
 	  </ReportToDB>
 	</MOVERS>
 
@@ -57,7 +56,7 @@
         </APPLY_TO_POSE>
 
         <PROTOCOLS>
-	  <Add mover_name=alascan_reporter/>
+	  <Add mover_name="alascan_reporter"/>
         </PROTOCOLS>
 
         <OUTPUT />
