@@ -85,13 +85,13 @@ sge_task_id = 0
 run_locally = True
 run_on_sge = False
 if "SGE_TASK_ID" in os.environ:
-    sge_task_id = long(os.environ["SGE_TASK_ID"])
+    sge_task_id = int(os.environ["SGE_TASK_ID"])
     run_locally = False
     run_on_sge = True
 
 job_id = 0
 if "JOB_ID" in os.environ:
-    job_id=long(os.environ["JOB_ID"])
+    job_id=int(os.environ["JOB_ID"])
 
 def roundTime(dt=None, roundTo=1):
     """Round a datetime object to any time period (in seconds)
