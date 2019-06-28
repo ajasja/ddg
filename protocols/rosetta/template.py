@@ -388,9 +388,9 @@ def run_local():
     # Integer argument allows number of jobs to run to be specified
     # Jobs will be run single-threaded for debugging
     if len(sys.argv) > 1:
-        jobs_to_run = int(sys.argv[1])
+        job_to_run = int(sys.argv[1])
     else:
-        jobs_to_run = None
+        job_to_run = None
 
     class MultiWorker:
         def __init__(self, task, func):
@@ -402,7 +402,7 @@ def run_local():
             self.number_finished += 1
             self.reporter.report(self.number_finished)
         def addJob(self,argsTuple):
-            if jobs_to_run:
+            if job_to_run:
                 # Testing
                 self.cb( self.func(argsTuple[0], argsTuple[1], argsTuple[2], argsTuple[3], argsTuple[4]) )
             else:
@@ -424,10 +424,11 @@ def run_local():
     num_jobs = len(job_dict.keys())
     worker.reporter.set_total_count(num_jobs)
 
-    for i in range(0, num_jobs): # Manually specify which jobs to run here, if you desire. Or pass as argument
-        if jobs_to_run and i >= jobs_to_run:
-            break
-        worker.addJob( (i, local_rosetta_bin, local_rosetta_db, local_scratch_dir, 1) )
+    if not job_to_run is None:
+        worker.addJob( (job_to_run, local_rosetta_bin, local_rosetta_db, local_scratch_dir, 1) )
+    else:
+        for i in range(0, num_jobs): # Manually specify which jobs to run here, if you desire. Or pass as argument
+            worker.addJob( (i, local_rosetta_bin, local_rosetta_db, local_scratch_dir, 1) )
 
     worker.finishJobs()
 

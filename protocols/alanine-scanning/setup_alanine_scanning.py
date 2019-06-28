@@ -393,6 +393,12 @@ if __name__ == "__main__":
     settings["output_dir"] = output_dir
 
     write_run_file(settings)
+    import sys
+    #write a tasklist file
+    with open(os.path.abspath(output_dir)+"/task.list",'w') as f:
+        for i in range(len(job_dict)):
+            print(f'cd {os.path.abspath(output_dir)} && {sys.executable} alascan_run.py {i}', file=f)
+
 
     print("Job files written to directory:", os.path.abspath(output_dir))
 
