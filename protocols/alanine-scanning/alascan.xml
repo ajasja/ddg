@@ -24,6 +24,7 @@
 
         <SCOREFXNS>
 						<ScoreFunction name="fa_talaris2014" weights="talaris2014"/>
+						<!-- all the score functions do not want to be loaded at the same time, due to the --restore_XXXXXX_behavior flags
 						<ScoreFunction name="fa_talaris2013_cart" weights="talaris2013_cart"/>
 						<ScoreFunction name="fa_score12" weights="score12"/>
 						<ScoreFunction name="fa_soft_rep" weights="soft_rep"/>
@@ -35,6 +36,7 @@
 							<Reweight scoretype="fa_dun" weight="0.07"/>
 						</ScoreFunction>
 						<ScoreFunction name="fa_interface" weights="interface"/>
+						-->
         </SCOREFXNS>
 
         <TASKOPERATIONS>
