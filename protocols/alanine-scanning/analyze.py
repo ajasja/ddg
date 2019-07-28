@@ -87,7 +87,7 @@ if __name__ == '__main__':
             output_dir, pickle_name
         )
         
-        with open(job_pickle_file,'r') as p:
+        with open(job_pickle_file,'rb') as p:
             job_dict = pickle.load(p)
 
         db_output_files = []
@@ -97,7 +97,7 @@ if __name__ == '__main__':
             if os.path.isfile(db_output_file):
                 db_output_files.append(db_output_file)
 
-        print('Found %d output dbs (%d expected)' % (len(db_output_files), len(job_dict)))
+        print(('Found %d output dbs (%d expected)' % (len(db_output_files), len(job_dict))))
 
         score_fxns = set()
         ddg_data = {}
@@ -192,7 +192,7 @@ if __name__ == '__main__':
             if i == j:
                 continue
 
-            print('########', i_score_fxn, 'vs', j_score_fxn, '########')
+            print(('########', i_score_fxn, 'vs', j_score_fxn, '########'))
 
             print('#### Points in interface: ####')
             run_stats(

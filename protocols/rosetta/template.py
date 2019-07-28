@@ -414,7 +414,7 @@ def run_local():
             self.pool.join()
             self.reporter.done()
 
-    worker = MultiWorker('running script locally', run_single)
+    
 
     if os.path.isfile(job_pickle_file):
         p = open(job_pickle_file, 'rb')
@@ -422,15 +422,16 @@ def run_local():
         p.close()
 
     num_jobs = len(job_dict.keys())
-    worker.reporter.set_total_count(num_jobs)
-
+    
     if not job_to_run is None:
-        worker.addJob( (job_to_run, local_rosetta_bin, local_rosetta_db, local_scratch_dir, 1) )
+        run_single(job_to_run, local_rosetta_bin, local_rosetta_db, local_scratch_dir,  move_output_files=True) 
     else:
+        worker = MultiWorker('running script locally', run_single)
+        worker.reporter.set_total_count(num_jobs)
         for i in range(0, num_jobs): # Manually specify which jobs to run here, if you desire. Or pass as argument
             worker.addJob( (i, local_rosetta_bin, local_rosetta_db, local_scratch_dir, 1) )
 
-    worker.finishJobs()
+        worker.finishJobs()
 
 def run_cluster():
     # Determine which tasks this job will run
